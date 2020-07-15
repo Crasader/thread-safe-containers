@@ -1,0 +1,1 @@
+add_catch_test(TestConcurrentQueue ConcurrentQueue DataStructures TestConcurrentQueue.cpp)
