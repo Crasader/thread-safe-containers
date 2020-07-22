@@ -1,0 +1,5 @@
+# VScode and Visual Studio IDE settings
+.vscode
+.vs
+# Ignore any build folder
+Build*/
