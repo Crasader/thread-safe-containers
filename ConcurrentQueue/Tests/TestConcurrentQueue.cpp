@@ -7,6 +7,7 @@
 
 #include "ConcurrentQueue.h"
 
+/*
 //*********** Single thread tests********** 
 SCENARIO ("Populating then emptying a queue with a single thread", "[ConcurrentQueue]") 
 {
@@ -403,3 +404,4 @@ SCENARIO ("The queue can be frontPop'd concurrently", "[ConcurrentQueue]")
         }       
     }
 }
+*/
