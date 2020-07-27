@@ -25,6 +25,9 @@ This means only default constructable objects can be stored in the queue.
 ### Out Parameter 
 Similiar to the pair method except the data is returned via an out parameter. This puts the responsibility on the calling code to construct the object. 
 
+### Throw an exception
+An empty queue isn't exceptional. 
+
 ### Optional `std::optional<T>`
 Calling code doesn't have to construct any out param objects.
 Clean syntax to check if data is valid.
