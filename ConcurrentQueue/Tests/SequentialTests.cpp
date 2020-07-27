@@ -86,3 +86,41 @@ SCENARIO ("Basic Usage waitingFrontPop()")
         }
     }
 }
+
+SCENARIO ("Copy construct & copy assign a queue")
+{
+    GIVEN  ("A queue of 20 strings") 
+	{
+        ConcurrentQueue<std::string> queue;
+        for (int i = 0; i < 20; i++)
+        {
+            queue.push(std::to_string(i));
+        }
+            WHEN ("The queue is copy constructed")
+            {		
+                ConcurrentQueue<std::string> copied_queue(queue);
+
+                THEN ("The queue will have the same data as the original queue")
+                {		
+                    for (int i = 0; i < 20; i++)
+                    {
+                        auto val = queue.waitingFrontPop();
+                        CHECK (val == std::to_string(i));
+                    }
+                }
+            }
+            WHEN ("The queue is copy assigned")
+            {		
+                ConcurrentQueue<std::string> copied_queue = queue;
+
+                THEN ("The queue will have the same data as the original queue")
+                {		
+                    for (int i = 0; i < 20; i++)
+                    {
+                        auto val = queue.waitingFrontPop();
+                        CHECK (val == std::to_string(i));
+                    }
+                }
+            }
+    }
+}
