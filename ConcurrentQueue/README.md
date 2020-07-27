@@ -31,3 +31,9 @@ An empty queue isn't exceptional.
 ### Optional `std::optional<T>`
 Calling code doesn't have to construct any out param objects.
 Clean syntax to check if data is valid.
+
+## Mutex & Conditional Variable type
+`std::shared_mutex` is used to allow multiple readers to access the queue at the same time. 
+`std::condition_variable` only works with std::mutex (for performance reasons).
+`std::condition_variable_any` is used instead because it works with a shared mutex. 
+May want to consider using switching this if the performance is noticable.

@@ -23,7 +23,7 @@ public:
 private:
     mutable std::shared_mutex mMutex;
     std::queue<T, Container> mQueue;
-    std::condition_variable mConVar;
+    std::condition_variable_any mConVar;
 };
 
 
@@ -39,7 +39,7 @@ template<typename T, class Container>
 ConcurrentQueue<T>& ConcurrentQueue<T, Container>::operator=(const ConcurrentQueue& other)
 {
     // Check not self assigment
-    if (this != &other)
+    if (this != &other) // Todo - other.this? https://stackoverflow.com/questions/1905237/where-in-memory-is-vtable-stored
     {
         // Lock both mutexes at the same time
         std::scoped_lock scoped_lock(mMutex, std::defer_lock);
@@ -71,9 +71,9 @@ void ConcurrentQueue<T, Container>::push(const T& obj)
 template<typename T, class Container>
 T ConcurrentQueue<T, Container>::waitingFrontPop()
 {
-    std::scoped_lock scopedLock(mMutex);
-    mConVar.wait(scopedLock, [&this] {return !mQueue.emtpy(); });
-    T val = mQueue.front() //TODO:  value = std::move(data_queue.front()) ?
+    std::unique_lock uniqueLock(mMutex);
+    mConVar.wait(uniqueLock, [this] {return !mQueue.empty(); });
+    T value = mQueue.front(); //TODO:  value = std::move(data_queue.front()) ?
     mQueue.pop();
     return value;
 }
