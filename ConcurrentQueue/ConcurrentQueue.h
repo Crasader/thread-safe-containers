@@ -4,6 +4,7 @@
 #include <queue>
 #include <shared_mutex>
 #include <condition_variable>
+#include <optional>
 
 template<typename T, class Container = std::deque<T>>
 class ConcurrentQueue
@@ -16,7 +17,7 @@ public:
 
     void push(const T& obj);   
     T waitingPop();
-    std::pair<bool, T> tryPop();
+    std::optional<T> tryPop();
     bool empty() const; 
 
 private:
@@ -78,19 +79,18 @@ T ConcurrentQueue<T, Container>::waitingPop()
 }
 
 template<typename T, class Container>
-std::pair<bool, T> ConcurrentQueue<T, Container>::tryPop()
+std::optional<T> ConcurrentQueue<T, Container>::tryPop()
 {
     std::scoped_lock<std::shared_mutex> scopedLock(mMutex);
     if (!mQueue.empty())
     {
         T obj = mQueue.front();
         mQueue.pop();
-        return std::make_pair<true, obj>;
+        return obj;
     }
     else
     {
-        T obj; //TODO
-        return std::make_pair<false, obj>
+        return std::nullopt;
     }
 }
 
