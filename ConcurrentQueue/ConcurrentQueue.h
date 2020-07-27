@@ -16,8 +16,8 @@ public:
     ~ConcurrentQueue() = default;
 
     void push(const T& obj);   
-    T waitingPop();
-    std::optional<T> tryPop();
+    T waitingFrontPop();
+    std::optional<T> tryFrontPop();
     bool empty() const; 
 
 private:
@@ -31,7 +31,7 @@ private:
 template<typename T, class Container>
 ConcurrentQueue<T, Container>::ConcurrentQueue(const ConcurrentQueue& other)
 {
-    std::shared_lock<std::shared_mutex> sharedLock(other.mMutex);
+    std::shared_lock sharedLock(other.mMutex);
     mQueue = other.mQueue;
 }
 
@@ -42,8 +42,8 @@ ConcurrentQueue<T>& ConcurrentQueue<T, Container>::operator=(const ConcurrentQue
     if (this != &other)
     {
         // Lock both mutexes at the same time
-        std::scoped_lock<std::shared_mutex> scoped_lock(mMutex, std::defer_lock);
-        std::shared_lock<std::shared_mutex> other_shared_lock(other.mMutex, std::defer_lock);
+        std::scoped_lock scoped_lock(mMutex, std::defer_lock);
+        std::shared_lock other_shared_lock(other.mMutex, std::defer_lock);
         std::lock(scoped_lock, other_shared_lock);
 
         mQueue = other.mQueue;
@@ -54,7 +54,7 @@ ConcurrentQueue<T>& ConcurrentQueue<T, Container>::operator=(const ConcurrentQue
 template<typename T, class Container>
 void ConcurrentQueue<T, Container>::push(const T& obj)
 {
-    std::unique_lock<std::shared_mutex> uniqueLock(mMutex);
+    std::unique_lock uniqueLock(mMutex);
     bool const was_empty = mQueue.empty();
 
     mQueue.push(obj);
@@ -69,9 +69,9 @@ void ConcurrentQueue<T, Container>::push(const T& obj)
 }
 
 template<typename T, class Container>
-T ConcurrentQueue<T, Container>::waitingPop()
+T ConcurrentQueue<T, Container>::waitingFrontPop()
 {
-    std::scoped_lock<std::shared_mutex> scopedLock(mMutex);
+    std::scoped_lock scopedLock(mMutex);
     mConVar.wait(scopedLock, [&this] {return !mQueue.emtpy(); });
     T val = mQueue.front() //TODO:  value = std::move(data_queue.front()) ?
     mQueue.pop();
@@ -79,9 +79,9 @@ T ConcurrentQueue<T, Container>::waitingPop()
 }
 
 template<typename T, class Container>
-std::optional<T> ConcurrentQueue<T, Container>::tryPop()
+std::optional<T> ConcurrentQueue<T, Container>::tryFrontPop()
 {
-    std::scoped_lock<std::shared_mutex> scopedLock(mMutex);
+    std::scoped_lock scopedLock(mMutex);
     if (!mQueue.empty())
     {
         T obj = mQueue.front();
@@ -97,7 +97,7 @@ std::optional<T> ConcurrentQueue<T, Container>::tryPop()
 template<typename T, class Container>
 bool ConcurrentQueue<T, Container>::empty() const
 {
-    std::shared_lock<std::shared_mutex> sharedLock(mMutex);
+    std::shared_lock sharedLock(mMutex);
     return mQueue.empty();
 }
 
