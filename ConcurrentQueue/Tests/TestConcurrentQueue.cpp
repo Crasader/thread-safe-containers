@@ -2,208 +2,55 @@
 #include <thread>
 #include <string>
 
+
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
 #include "ConcurrentQueue.h"
 
-/*
-//*********** Single thread tests********** 
-SCENARIO ("Populating then emptying a queue with a single thread", "[ConcurrentQueue]") 
+
+SCENARIO ("Basic Usage")
 {
-    ConcurrentQueue<std::string> concurrentQueue;
-    int max= 25;
-    
-    GIVEN  ("An empty queue") 
+    GIVEN  ("A queue of 20 strings") 
 	{
-        for (int i = 0; i < max; i++)
+        ConcurrentQueue<std::string> concurrentQueue;
+        for (int i = 0; i < 20; i++)
         {
             concurrentQueue.push(std::to_string(i));
         }
 
-        WHEN ("The queue is populated with std::strings")
-		{
-            THEN ("The queue will contain values")
-			{
-                CHECK ( concurrentQueue.empty() == false);
-                CHECK ( concurrentQueue.size() == max);
-                
-            }
-        }        
-    }
+        THEN ("The queue will not be empty")
+        {
+            CHECK (concurrentQueue.empty() == false);
+        }
 
-    GIVEN  ("A full queue") 
-	{
-        WHEN ("The queue is emptied")
-		{		
-            for (int i = 0; i < max; i++)
+        WHEN ("The queue is popped 20 times")
+        {		
+            for (int i = 0; i < 20; i++)
             {
-                concurrentQueue.pop();
+                auto val = concurrentQueue.tryFrontPop();
+                CHECK (val.has_value() == true);
+                CHECK (val == std::to_string(i));
             }
 
-            THEN ("The queue will be empty values")
-			{
-                CHECK ( concurrentQueue.empty() == true);
-                CHECK ( concurrentQueue.size() == 0);
-            }
-        }        
-    }
-}
-
-SCENARIO ("All queue elements contain a value", "[ConcurrentQueue]") 
-{
-    ConcurrentQueue<std::string> concurrentQueue;
-    int max= 25;
-
-    for (int i = 0; i < max; i++)
-    {
-        concurrentQueue.push(std::to_string(i));
-    }
-    
-    GIVEN  ("A full queue") 
-	{
-        WHEN ("We loop through every front element")
-		{
-            THEN ("The queue will contain values")
-			{
-                int expectedValue = 0;
-                while(!concurrentQueue.empty())
-                {
-                    std::string testString;
-                    concurrentQueue.tryFront(testString);
-                    CHECK (testString == std::to_string(expectedValue));
-                    concurrentQueue.pop();
-                    expectedValue++;
-                }
-            }
-        }        
-    }
-}
-
-SCENARIO ("TryFront returns a valid status depending on the state of the queue", "[ConcurrentQueue]") 
-{
-    ConcurrentQueue<std::string> concurrentQueue;
-    
-    GIVEN  ("A queue is empty") 
-	{
-        WHEN ("We call tryFront()")
-		{
-            THEN ("The status returned will be EMPTY and nothing will be taken from front")
-			{
-                std::string testString;
-                QueueStatus status = concurrentQueue.tryFront(testString);
-                CHECK (testString == "");
-                CHECK (status == QueueStatus::EMPTY);    
-            }
-        }        
-    }
-
-    GIVEN  ("A queue is not empty") 
-	{
-        std::string expectedOutput = "Expected output";
-        concurrentQueue.push(expectedOutput);
-
-        WHEN ("We call tryFront()")
-		{
-            THEN ("The status returned will be FOUND and the value from front will be taken")
-			{
-                std::string testString;
-                QueueStatus status = concurrentQueue.tryFront(testString);
-                CHECK (testString == expectedOutput);
-                CHECK (status == QueueStatus::FOUND);    
-            }
-        }        
-    }
-}
-
-SCENARIO ("TryFrontAndPop returns a valid status depending on the state of the queue", "[ConcurrentQueue]") 
-{
-    ConcurrentQueue<std::string> concurrentQueue;
-    
-    GIVEN  ("A queue is empty") 
-	{
-        WHEN ("We call tryFrontAndPop()")
-		{
-            THEN ("The status returned will be EMPTY and nothing will be taken from front")
-			{
-                std::string testString;
-                QueueStatus status = concurrentQueue.tryFrontAndPop(testString);
-                CHECK (testString == "");
-                CHECK (status == QueueStatus::EMPTY);    
-            }
-        }        
-    }
-
-    GIVEN  ("A queue is not empty") 
-	{
-        std::string expectedOutput = "Expected output";
-        concurrentQueue.push(expectedOutput);
-
-        WHEN ("We call tryFrontAndPop()")
-		{
-            THEN ("The status returned will be FOUND and the value from front will be taken")
-			{
-                std::string testString;
-                QueueStatus status = concurrentQueue.tryFrontAndPop(testString);
-                CHECK (testString == expectedOutput);
-                CHECK (status == QueueStatus::FOUND);    
-                CHECK (concurrentQueue.empty() == true);   
-            }
-        }        
-    }
-}
-
-SCENARIO ("A queue element can be grabbed then removed from the queue within the same function", "[ConcurrentQueue]") 
-{
-    ConcurrentQueue<std::string> concurrentQueue;
-    std::string expectedValue = "Hello";
-    concurrentQueue.push(expectedValue);
-
-    GIVEN  ("A populated queue") 
-	{
-        WHEN ("We call frontAndPop")
-		{
-            std::string tempString;
-            concurrentQueue.tryFrontAndPop(tempString);
-
-            THEN ("The item will be stored locally")
-			{
-                CHECK (tempString == expectedValue);
-            }
-
-            THEN ("The item will be removed from the queue")
-			{
+            THEN ("The queue will be empty")
+            {
                 CHECK (concurrentQueue.empty() == true);
             }
-        }        
-    }
-}
 
-SCENARIO ("An object can be moved into a queue", "[ConcurrentQueue]") 
-{
-    ConcurrentQueue<std::string> concurrentQueue;
-    std::string originalValue = "Hello";
-
-    GIVEN("An empty queue and object to move into it") 
-	{
-        WHEN ("We move an item into the queue")
-		{
-            concurrentQueue.push(std::move(originalValue));
-            
-            THEN ("The object will be in the queue")
-			{
-                std::string tempString;
-                concurrentQueue.tryFront(tempString);
-                CHECK (tempString == "Hello");
+            THEN ("Accessing the queue will return nullopt")
+            {
+                auto val = concurrentQueue.tryFrontPop();
+                CHECK (val.has_value() == false);
             }
-
-            THEN ("The item will be removed from the queue")
-			{
-                CHECK (originalValue == "");
-            }
-        }        
+        }
     }
-}
+} 
+
+// TODO: Move semantic tests
+/*
+
+
 
 //*********** Multi thread tests********** 
 
