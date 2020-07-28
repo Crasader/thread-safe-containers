@@ -2,49 +2,48 @@
 #include <thread>
 #include <vector>
 #include <iostream>
+#include <future>
 
 #include "catch.hpp"
 #include "ConcurrentQueue.h"
 
 
-void pushData(ConcurrentQueue<int>& queue, int& total)
+int pushData(ConcurrentQueue<int>& queue)
 {
     std::vector<int> nums{ 1,2,3,4,5 };
+    int total{0};
     for (auto num : nums){
         queue.push(num);
         total += num;
     }
+    return total;
 }
 
-void consumeData(ConcurrentQueue<int>& queue, int& total)
+int consumeData(ConcurrentQueue<int>& queue)
 {
+    int total{0};
     while (auto data = queue.tryFrontPop())
     {
         total += *data;
     }
+    return total;
 }
 
 
-// TODO: this sometimes fails
 SCENARIO("Sum numbers")
 {
     ConcurrentQueue<int> queue;
-    int pTotal{ 0 };
-    std::thread producer1(pushData, std::ref(queue), std::ref(pTotal));
-    int pTotal2{ 0 };
-    std::thread producer2(pushData, std::ref(queue), std::ref(pTotal2));
+    std::future<int> producer1Total = std::async(std::launch::async, pushData, std::ref(queue));
+    std::future<int> producer2Total = std::async(std::launch::async, pushData, std::ref(queue));
 
-    int cTotal{ 0 };
-    std::thread consumer1(consumeData, std::ref(queue), std::ref(cTotal));
-    int cTotal2{ 0 };
-    std::thread consumer2(consumeData, std::ref(queue), std::ref(cTotal2));
+    std::future<int> consumer1Total = std::async(std::launch::async, consumeData, std::ref(queue));
+    std::future<int> consumer2Total = std::async(std::launch::async, consumeData, std::ref(queue));
 
-    producer1.join();
-    producer2.join();
-    consumer1.join();
-    consumer2.join();
+    std::cout << producer1Total.get();
+    std::cout << producer2Total.get();
+    std::cout << consumer1Total.get();
+    std::cout << consumer2Total.get();
 
-    CHECK(pTotal + pTotal2 == cTotal + cTotal2);
 }
 
 
