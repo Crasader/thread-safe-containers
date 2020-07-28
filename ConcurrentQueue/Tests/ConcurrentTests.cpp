@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <future>
+#include <cstdlib> //Random number
 
 #include "catch.hpp"
 #include "ConcurrentQueue.h"
@@ -10,7 +11,9 @@
 
 int pushData(ConcurrentQueue<int>& queue)
 {
-    std::vector<int> nums{ 1,2,3,4,5 };
+    std::vector<int> nums {100};
+    srand (time(NULL));
+    std::generate(nums.begin(), nums.end(), std::rand);
     int total{0};
     for (auto num : nums){
         queue.push(num);
@@ -34,16 +37,15 @@ SCENARIO("Sum numbers")
 {
     ConcurrentQueue<int> queue;
     std::future<int> producer1Total = std::async(std::launch::async, pushData, std::ref(queue));
-    std::future<int> producer2Total = std::async(std::launch::async, pushData, std::ref(queue));
-
     std::future<int> consumer1Total = std::async(std::launch::async, consumeData, std::ref(queue));
+    std::future<int> producer2Total = std::async(std::launch::async, pushData, std::ref(queue));
+    std::future<int> producer3Total = std::async(std::launch::async, pushData, std::ref(queue));
     std::future<int> consumer2Total = std::async(std::launch::async, consumeData, std::ref(queue));
 
-    std::cout << producer1Total.get();
-    std::cout << producer2Total.get();
-    std::cout << consumer1Total.get();
-    std::cout << consumer2Total.get();
+    int prodTotal = producer1Total.get() + producer2Total.get() + producer3Total.get();
+    int consTotal = consumer1Total.get() + consumer2Total.get();
 
+    CHECK(prodTotal == consTotal);
 }
 
 
