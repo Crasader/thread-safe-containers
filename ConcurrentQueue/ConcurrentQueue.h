@@ -42,9 +42,9 @@ ConcurrentQueue<T>& ConcurrentQueue<T, Container>::operator=(const ConcurrentQue
     if (this != &other) // Todo - other.this? https://stackoverflow.com/questions/1905237/where-in-memory-is-vtable-stored
     {
         // Lock both mutexes at the same time
-        std::scoped_lock scoped_lock(mMutex, std::defer_lock);
-        std::shared_lock other_shared_lock(other.mMutex, std::defer_lock);
-        std::lock(scoped_lock, other_shared_lock);
+        std::unique_lock unique_lock(mMutex, std::defer_lock);
+        std::unique_lock other_unique_lock(other.mMutex, std::defer_lock);
+        std::lock(unique_lock, other_unique_lock);
 
         mQueue = other.mQueue;
     }

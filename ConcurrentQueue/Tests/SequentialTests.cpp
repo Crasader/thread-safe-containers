@@ -111,7 +111,9 @@ SCENARIO ("Copy construct & copy assign a queue")
             }
             WHEN ("The queue is copy assigned")
             {		
-                ConcurrentQueue<std::string> copied_queue = queue;
+                // Assigment must be done on a seperate line from the declaration otherwise the copy constructor will be used.
+                ConcurrentQueue<std::string> copied_queue; 
+                copied_queue = queue;
 
                 THEN ("The queue will have the same data as the original queue")
                 {		
