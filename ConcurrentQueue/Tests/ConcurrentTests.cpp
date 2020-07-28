@@ -11,7 +11,7 @@
 
 int pushData(ConcurrentQueue<int>& queue)
 {
-    std::vector<int> nums {100};
+    std::vector<int> nums {10000000};
     srand (time(NULL));
     std::generate(nums.begin(), nums.end(), std::rand);
     int total{0};
@@ -32,34 +32,19 @@ int consumeData(ConcurrentQueue<int>& queue)
     return total;
 }
 
-
-SCENARIO("Sum numbers")
+TEST_CASE("Sum numbers")
 {
     ConcurrentQueue<int> queue;
+
     std::future<int> producer1Total = std::async(std::launch::async, pushData, std::ref(queue));
     std::future<int> consumer1Total = std::async(std::launch::async, consumeData, std::ref(queue));
     std::future<int> producer2Total = std::async(std::launch::async, pushData, std::ref(queue));
     std::future<int> producer3Total = std::async(std::launch::async, pushData, std::ref(queue));
     std::future<int> consumer2Total = std::async(std::launch::async, consumeData, std::ref(queue));
+    std::future<int> consumer3Total = std::async(std::launch::async, consumeData, std::ref(queue));
 
     int prodTotal = producer1Total.get() + producer2Total.get() + producer3Total.get();
-    int consTotal = consumer1Total.get() + consumer2Total.get();
+    int consTotal = consumer1Total.get() + consumer2Total.get() + consumer3Total.get();
 
     CHECK(prodTotal == consTotal);
 }
-
-
-/*
-template<size_t producer_count, size_t consumer_count>
-void sumNumbers()
-{
-    ConcurrentQueue<int> queue;
-
-    std::array<std::thread, producer_count> producers;
-    std::array<std::thread, consumer_count> consumers;
-    for (size_t i = 0; i < producer_count; ++i)
-    {
-
-    }
-}
-*/
