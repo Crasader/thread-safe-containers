@@ -138,3 +138,41 @@ SCENARIO ("Copy construct & copy assign a queue")
             }
     }
 }
+
+struct Counter {
+public:
+    Counter() { ++count; }
+    Counter(const Counter& other) { ++count; }
+    Counter(Counter&& other) = default;
+    static size_t count;
+};
+size_t Counter::count = 0;
+
+SCENARIO("Move an object into the queue")
+{
+    GIVEN("An empty queue and 1 Counter objects")
+    {
+        ConcurrentQueue<Counter> queue;
+        Counter aCounter;
+        CHECK(Counter::count == 1);
+
+        WHEN("An lvalue object is copied into the queue")
+        {
+            queue.push(aCounter);
+
+            THEN("The constructor will have been called once")
+            {
+                CHECK(Counter::count == 2);
+
+                WHEN("An rvalue object is moved into the queue")
+                {
+                    queue.push(std::move(aCounter));
+                    THEN("The constructor will not have been called")
+                    {
+                        CHECK(Counter::count == 2);
+                    }
+                }
+            }
+        }
+    }
+}

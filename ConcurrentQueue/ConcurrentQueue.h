@@ -15,7 +15,8 @@ public:
     ConcurrentQueue<T>& operator=(const ConcurrentQueue& other);
     ~ConcurrentQueue() = default;
 
-    void push(const T& obj);   
+    void push(const T& object);   
+    void push(T&& object); 
     T waitingFrontPop();
     std::optional<T> tryFrontPop();
     bool empty() const; 
@@ -52,12 +53,29 @@ ConcurrentQueue<T>& ConcurrentQueue<T, Container>::operator=(const ConcurrentQue
 }
 
 template<typename T, class Container>
-void ConcurrentQueue<T, Container>::push(const T& obj)
+void ConcurrentQueue<T, Container>::push(const T& object)
 {
     std::unique_lock uniqueLock(mMutex);
     bool const was_empty = mQueue.empty();
 
-    mQueue.push(obj);
+    mQueue.push(object);
+
+    // If the queue was empty there may be some consumers waiting for data.
+    if (was_empty)
+    {
+        // Unlock mutex before notifying so waiting threads do not have to wait for the mutex after being woken.
+        uniqueLock.unlock();
+        mConVar.notify_one();
+    }
+}
+
+template<typename T, class Container>
+void ConcurrentQueue<T, Container>::push(T&& object)
+{
+    std::unique_lock uniqueLock(mMutex);
+    bool const was_empty = mQueue.empty();
+
+    mQueue.push(std::move(object));
 
     // If the queue was empty there may be some consumers waiting for data.
     if (was_empty)
