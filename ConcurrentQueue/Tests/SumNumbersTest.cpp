@@ -70,16 +70,15 @@ TEST_CASE("Sum numbers")
     ConcurrentQueue<int> queue;
     std::atomic<bool> producersComplete{false};
 
+    std::future<int> consumer1Total = std::async(consumeData, std::ref(queue), std::ref(producersComplete));
     std::future<int> producer1Total = std::async(pushData, std::ref(queue));
     std::future<int> producer2Total = std::async(pushData, std::ref(queue));
-    std::future<int> producer3Total = std::async(pushData, std::ref(queue));
-    std::future<int> consumer1Total = std::async(consumeData, std::ref(queue), std::ref(producersComplete));
     std::future<int> consumer2Total = std::async(consumeData, std::ref(queue), std::ref(producersComplete));
-    std::future<int> consumer3Total = std::async(consumeData, std::ref(queue), std::ref(producersComplete));
+    std::future<int> producer3Total = std::async(pushData, std::ref(queue));
 
     int prodTotal = producer1Total.get() + producer2Total.get() + producer3Total.get();
     producersComplete =true;
-    int consTotal = consumer1Total.get() + consumer2Total.get() + consumer3Total.get();
+    int consTotal = consumer1Total.get() + consumer2Total.get();
 
     CHECK(prodTotal == consTotal);
 }
