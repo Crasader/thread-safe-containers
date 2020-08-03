@@ -39,13 +39,13 @@ template<typename T, class Container>
 ConcurrentQueue<T>& ConcurrentQueue<T, Container>::operator=(const ConcurrentQueue& other)
 {
     // Check for self assigment
-    if (this != other.this)
+    if (this != &other)
     {
         // Lock both mutexes at the same time
         std::unique_lock unique_lock(mMutex, std::defer_lock);
         std::unique_lock other_unique_lock(other.mMutex, std::defer_lock);
         std::lock(unique_lock, other_unique_lock);
-        
+
         mQueue = other.mQueue;
     }
     return *this;
