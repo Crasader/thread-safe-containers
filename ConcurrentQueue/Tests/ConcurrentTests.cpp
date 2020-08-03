@@ -3,7 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <future>
-#include <cstdlib> //Random number
+#include <random>
 
 #include "catch.hpp"
 #include "ConcurrentQueue.h"
@@ -11,9 +11,18 @@
 
 int pushData(ConcurrentQueue<int>& queue)
 {
-    std::vector<int> nums {10000000};
-    srand (time(NULL));
-    std::generate(nums.begin(), nums.end(), std::rand);
+    // C++11 <random> setup
+    std::random_device rd;          // Will be used to obtain a seed for the random number engine
+    std::mt19937 generator( rd() ); // Standard mersenne_twister_engine
+    std::uniform_int_distribution dist(10000, 10000000); // Used to generate random vector size with min size and max size.
+
+    // Generate randomly sized vector with random numbers
+    int vector_size = dist(generator);
+    std::vector<int> nums {vector_size};
+    std::generate(nums.begin(), nums.end(), generator);
+
+    // Push each number into the concurrent queue 
+    // and calculate the total number
     int total{0};
     for (auto num : nums){
         queue.push(num);
