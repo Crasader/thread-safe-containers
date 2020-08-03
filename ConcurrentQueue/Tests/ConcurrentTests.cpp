@@ -8,13 +8,16 @@
 #include "catch.hpp"
 #include "ConcurrentQueue.h"
 
-
 int pushData(ConcurrentQueue<int>& queue)
 {
     // C++11 <random> setup
     std::random_device rd;          // Will be used to obtain a seed for the random number engine
-    std::mt19937 generator( rd() ); // Standard mersenne_twister_engine
-    std::uniform_int_distribution dist(10000, 10000000); // Used to generate random vector size with min size and max size.
+    auto seed = rd();
+    // Print seed so failed tests can be repeated
+    // Not using Catch2 macros INFO/SCOPED_INFO because they are not thread safe (only 1 thread can use them)
+    std::cout << "ConcurrentQueueTests - Using seed: " << seed << std::endl;  // TODO: thread synced logger?
+    std::mt19937 generator( seed ); // Standard mersenne_twister_engine
+    std::uniform_int_distribution dist(10000, 10000000); // Used to generate random vector size with min size and max size
 
     // Generate randomly sized vector with random numbers
     int vector_size = dist(generator);
@@ -31,28 +34,40 @@ int pushData(ConcurrentQueue<int>& queue)
     return total;
 }
 
-int consumeData(ConcurrentQueue<int>& queue)
+int consumeData(ConcurrentQueue<int>& queue, std::atomic<bool>& complete)
 {
     int total{0};
-    while (auto data = queue.tryFrontPop())
+
+    while ( true)
     {
-        total += *data;
+        if (auto data = queue.tryFrontPop())
+        {
+            total += *data;
+        }
+        else // there is no more data
+        {
+            if (complete) // The producers have stopped pushing data
+            {
+                return total;
+            }
+        }
     }
-    return total;
 }
 
 TEST_CASE("Sum numbers")
 {
     ConcurrentQueue<int> queue;
+    std::atomic<bool> producersComplete{false};
 
-    std::future<int> producer1Total = std::async(std::launch::async, pushData, std::ref(queue));
-    std::future<int> consumer1Total = std::async(std::launch::async, consumeData, std::ref(queue));
-    std::future<int> producer2Total = std::async(std::launch::async, pushData, std::ref(queue));
-    std::future<int> producer3Total = std::async(std::launch::async, pushData, std::ref(queue));
-    std::future<int> consumer2Total = std::async(std::launch::async, consumeData, std::ref(queue));
-    std::future<int> consumer3Total = std::async(std::launch::async, consumeData, std::ref(queue));
+    std::future<int> producer1Total = std::async(pushData, std::ref(queue));
+    std::future<int> producer2Total = std::async(pushData, std::ref(queue));
+    std::future<int> producer3Total = std::async(pushData, std::ref(queue));
+    std::future<int> consumer1Total = std::async(consumeData, std::ref(queue), std::ref(producersComplete));
+    std::future<int> consumer2Total = std::async(consumeData, std::ref(queue), std::ref(producersComplete));
+    std::future<int> consumer3Total = std::async(consumeData, std::ref(queue), std::ref(producersComplete));
 
     int prodTotal = producer1Total.get() + producer2Total.get() + producer3Total.get();
+    producersComplete =true;
     int consTotal = consumer1Total.get() + consumer2Total.get() + consumer3Total.get();
 
     CHECK(prodTotal == consTotal);
