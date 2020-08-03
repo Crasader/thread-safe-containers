@@ -101,4 +101,4 @@ bool ConcurrentQueue<T, Container>::empty() const
     return mQueue.empty();
 }
 
-#endif
+#endif // Header Guard

@@ -1,6 +1,34 @@
 # Overview
+This class provides a queue which can be shared between multiple threads and have multiple producers and consumers.
 
 # Usage
+# Construction
+Creating a queue of strings
+```C++
+ConcurrentQueue<std::string> queue;
+```
+# Insertion
+```C++
+queue.push("Hello");
+queue.push("World");
+```
+# Retreival
+Two methods are provided for retreiving data.
+If the queue is empty `tryFrontPop()` will return immediatly
+```C++
+auto val = queue.tryFrontPop();
+if (val){
+    std::cout << "My data is "<< *val;
+}
+else{
+    std::cout << "The queue was empty ";
+}
+```
+If the queue is empty `waitingFrontPop()` will wait until a producer puts something in the queue
+```C++
+auto val = queue.waitingFrontPop(); // Execution will wait here if the queue is empty
+std::cout << "My data is "<< val;
+```
 
 # Rationale
 ## tryFrontPop() return type
