@@ -124,5 +124,17 @@ SCENARIO ("Copy construct & copy assign a queue")
                     }
                 }
             }
+            WHEN ("The queue is self assigned")
+            {		
+                queue = queue;
+                THEN ("The queue will be unchanged")
+                {		
+                    for (int i = 0; i < 20; i++)
+                    {
+                        auto val = queue.waitingFrontPop();
+                        CHECK (val == std::to_string(i));
+                    }
+                }
+            }
     }
 }

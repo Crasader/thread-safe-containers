@@ -38,14 +38,14 @@ ConcurrentQueue<T, Container>::ConcurrentQueue(const ConcurrentQueue& other)
 template<typename T, class Container>
 ConcurrentQueue<T>& ConcurrentQueue<T, Container>::operator=(const ConcurrentQueue& other)
 {
-    // Check not self assigment
-    if (this != &other) // Todo - other.this? https://stackoverflow.com/questions/1905237/where-in-memory-is-vtable-stored
+    // Check for self assigment
+    if (this != other.this)
     {
         // Lock both mutexes at the same time
         std::unique_lock unique_lock(mMutex, std::defer_lock);
         std::unique_lock other_unique_lock(other.mMutex, std::defer_lock);
         std::lock(unique_lock, other_unique_lock);
-
+        
         mQueue = other.mQueue;
     }
     return *this;
