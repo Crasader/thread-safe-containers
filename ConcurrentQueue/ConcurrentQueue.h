@@ -73,9 +73,9 @@ T ConcurrentQueue<T, Container>::waitingFrontPop()
 {
     std::unique_lock uniqueLock(mMutex);
     mConVar.wait(uniqueLock, [this] {return !mQueue.empty(); });
-    T value = mQueue.front(); //TODO:  value = std::move(data_queue.front()) ?
+    T object = std::move(mQueue.front());
     mQueue.pop();
-    return value;
+    return object;
 }
 
 template<typename T, class Container>
@@ -84,9 +84,9 @@ std::optional<T> ConcurrentQueue<T, Container>::tryFrontPop()
     std::scoped_lock scopedLock(mMutex);
     if (!mQueue.empty())
     {
-        T obj = mQueue.front();
+        T object = std::move(mQueue.front());
         mQueue.pop();
-        return obj;
+        return object;
     }
     else
     {
