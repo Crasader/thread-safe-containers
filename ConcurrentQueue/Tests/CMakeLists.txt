@@ -1,6 +1,6 @@
 add_executable (TestConcurrentQueue TestConcurrentQueue.cpp
                                     SequentialTests.cpp
-                                    ConcurrentTests.cpp)
+                                    SumNumbersTest.cpp)
 
 target_link_libraries (TestConcurrentQueue PRIVATE Catch2)        # link to the testing library
 target_link_libraries (TestConcurrentQueue PRIVATE ConcurrentQueue)  # link to the business logic to be tested

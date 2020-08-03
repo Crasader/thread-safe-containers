@@ -54,6 +54,17 @@ int consumeData(ConcurrentQueue<int>& queue, std::atomic<bool>& complete)
     }
 }
 
+// The producers 
+// - generate random data
+// - push it to the queue
+// - total the numbers they have generated
+// - return the total number.
+// In parallel the consumers 
+// - read data from the queue
+// - maintain a total for all the numbers they have read.
+// The consumers stop reading when there is no more data in the queue and the producers have stopped pushing data.
+// A check is performed to ensure the total of the numbers the producers put in the queue is the same as the total of the numbers 
+// the consumers read from the queue.
 TEST_CASE("Sum numbers")
 {
     ConcurrentQueue<int> queue;
