@@ -8,14 +8,8 @@
 #include "catch.hpp"
 #include "ConcurrentQueue.h"
 
-int pushData(ConcurrentQueue<int>& queue)
+int pushData(ConcurrentQueue<int>& queue, unsigned int seed)
 {
-    // C++11 <random> setup
-    std::random_device rd;          // Will be used to obtain a seed for the random number engine
-    auto seed = rd();
-    // Print seed so failed tests can be repeated
-    // Not using Catch2 macros INFO/SCOPED_INFO because they are not thread safe (only 1 thread can use them)
-    std::cout << "ConcurrentQueueTests - Using seed: " << seed << std::endl;  // TODO: thread synced logger?
     std::mt19937 generator( seed ); // Standard mersenne_twister_engine
     std::uniform_int_distribution dist(10000, 10000000); // Used to generate random vector size with min size and max size
 
@@ -65,16 +59,29 @@ int consumeData(ConcurrentQueue<int>& queue, std::atomic<bool>& complete)
 // The consumers stop reading when there is no more data in the queue and the producers have stopped pushing data.
 // A check is performed to ensure the total of the numbers the producers put in the queue is the same as the total of the numbers 
 // the consumers read from the queue.
+// Catch2 macros INFO/SCOPED_INFO are not thread safe so the seed has to be generated & printed in main thread rather than in producers thread
 TEST_CASE("Sum numbers")
 {
     ConcurrentQueue<int> queue;
     std::atomic<bool> producersComplete{false};
+    std::random_device rd;        
 
+    // Consumer 1
     std::future<int> consumer1Total = std::async(consumeData, std::ref(queue), std::ref(producersComplete));
-    std::future<int> producer1Total = std::async(pushData, std::ref(queue));
-    std::future<int> producer2Total = std::async(pushData, std::ref(queue));
+    // Producer 1 
+    auto producer1Seed = rd();
+    INFO("Producer 1 using seed: " << producer1Seed);
+    std::future<int> producer1Total = std::async(pushData, std::ref(queue), producer1Seed);
+    // Producer 2
+    auto producer2Seed = rd();
+    INFO("Producer 2 using seed: " << producer2Seed);
+    std::future<int> producer2Total = std::async(pushData, std::ref(queue), producer2Seed);
+    // Consumer 2
     std::future<int> consumer2Total = std::async(consumeData, std::ref(queue), std::ref(producersComplete));
-    std::future<int> producer3Total = std::async(pushData, std::ref(queue));
+    // Producer 3
+    auto producer3Seed = rd();
+    INFO("Producer 3 using seed: " << producer3Seed);
+    std::future<int> producer3Total = std::async(pushData, std::ref(queue), producer3Seed);
 
     int prodTotal = producer1Total.get() + producer2Total.get() + producer3Total.get();
     producersComplete =true;

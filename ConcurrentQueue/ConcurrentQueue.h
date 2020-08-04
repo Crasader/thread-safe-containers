@@ -56,7 +56,7 @@ template<typename T, class Container>
 void ConcurrentQueue<T, Container>::push(const T& object)
 {
     std::unique_lock uniqueLock(mMutex);
-    bool const was_empty = mQueue.empty();
+    const bool was_empty = mQueue.empty();
 
     mQueue.push(object);
 
@@ -73,7 +73,7 @@ template<typename T, class Container>
 void ConcurrentQueue<T, Container>::push(T&& object)
 {
     std::unique_lock uniqueLock(mMutex);
-    bool const was_empty = mQueue.empty();
+    const bool was_empty = mQueue.empty();
 
     mQueue.push(std::move(object));
 
