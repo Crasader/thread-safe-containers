@@ -12,6 +12,4 @@ add_test(NAME TestConcurrentQueue
 
 # Add CTest label. Tests with the same label are grouped together. 
 set_tests_properties (TestConcurrentQueue PROPERTIES LABELS DataStructures) 
-
-set_target_properties (TestConcurrentQueue PROPERTIES FOLDER UnitTests/DataStructures) 
     
