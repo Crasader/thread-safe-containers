@@ -1,7 +1,4 @@
-#include <array>
-#include <thread>
 #include <vector>
-#include <iostream>
 #include <future>
 #include <random>
 
@@ -11,9 +8,9 @@
 int pushData(ConcurrentQueue<int>& queue, std::random_device::result_type seed)
 {
     std::mt19937 generator( seed ); // Standard mersenne_twister_engine
-    std::uniform_int_distribution dist(10000, 10000000); // Used to generate random vector size with min size and max size
 
     // Generate randomly sized vector with random numbers
+    std::uniform_int_distribution dist(10000, 10000000); // Used to generate random vector size with min size and max size
     int vector_size = dist(generator);
     std::vector<int> nums {vector_size};
     std::generate(nums.begin(), nums.end(), generator);
@@ -75,7 +72,7 @@ TEST_CASE("Sum numbers")
     std::future<int> producer3Total = std::async(pushData, std::ref(queue), ++seed);
 
     int prodTotal = producer1Total.get() + producer2Total.get() + producer3Total.get();
-    producersComplete =true;
+    producersComplete = true;
     int consTotal = consumer1Total.get() + consumer2Total.get();
 
     CHECK(prodTotal == consTotal);
