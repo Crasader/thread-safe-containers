@@ -8,7 +8,7 @@
 #include "catch.hpp"
 #include "ConcurrentQueue.h"
 
-int pushData(ConcurrentQueue<int>& queue, unsigned int seed)
+int pushData(ConcurrentQueue<int>& queue, std::random_device::result_type seed)
 {
     std::mt19937 generator( seed ); // Standard mersenne_twister_engine
     std::uniform_int_distribution dist(10000, 10000000); // Used to generate random vector size with min size and max size
@@ -65,7 +65,7 @@ TEST_CASE("Sum numbers")
     ConcurrentQueue<int> queue;
     std::atomic<bool> producersComplete{false};
     std::random_device rd;  
-    auto seed = rd();
+    std::random_device::result_type seed = rd();
     INFO("Using seed: " << seed);      
 
     // Consumer 1
