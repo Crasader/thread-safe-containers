@@ -75,6 +75,7 @@ SCENARIO ("Basic Usage waitingFrontPop()")
                     {
                         std::this_thread::sleep_for (std::chrono::milliseconds(200));
                         queue.push("A new item");
+
                         THEN("The waiting thread will get the new item")
                         {
                             thread1.join();
@@ -127,6 +128,7 @@ SCENARIO ("Copy construct & copy assign a queue")
             WHEN ("The queue is self assigned")
             {		
                 queue = queue;
+                
                 THEN ("The queue will be unchanged")
                 {		
                     for (int i = 0; i < 20; i++)
@@ -172,6 +174,7 @@ SCENARIO("Move an object into the queue")
                 WHEN("An rvalue object is moved into the queue")
                 {
                     queue.push(std::move(aCounter));
+
                     THEN("The move constructor will be called once")
                     {
                         CHECK(Counter::moveCtorCount == 1);
