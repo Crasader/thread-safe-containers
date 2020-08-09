@@ -111,8 +111,8 @@ SCENARIO ("Copy construct & copy assign a queue")
             }
             WHEN ("The queue is copy assigned")
             {		
-                // Assigment must be done on a seperate line from the declaration otherwise the copy constructor will be used.
                 ConcurrentQueue<std::string> copied_queue; 
+                // Assigment must be done on a seperate line from the declaration otherwise the copy constructor will be used.
                 copied_queue = queue;
 
                 THEN ("The queue will have the same data as the original queue")
@@ -141,14 +141,14 @@ SCENARIO ("Copy construct & copy assign a queue")
 
 struct Counter {
 public:
-    Counter() { ++ctorCount; }
+    Counter()                     { ++ctorCount;     }
     Counter(const Counter& other) { ++copyCtorCount; }
-    Counter(Counter&& other) { ++moveCtorCount; }
+    Counter(Counter&& other)      { ++moveCtorCount; }
     static size_t ctorCount;
     static size_t copyCtorCount;
     static size_t moveCtorCount;
 };
-size_t Counter::ctorCount = 0;
+size_t Counter::ctorCount     = 0;
 size_t Counter::copyCtorCount = 0;
 size_t Counter::moveCtorCount = 0;
 
@@ -164,7 +164,7 @@ SCENARIO("Move an object into the queue")
         {
             queue.push(aCounter);
 
-            THEN("The copy constructor will have been called once")
+            THEN("The copy constructor will be called once")
             {
                 CHECK(Counter::copyCtorCount == 1);
                 CHECK(Counter::ctorCount == 1); // No change 
@@ -172,11 +172,11 @@ SCENARIO("Move an object into the queue")
                 WHEN("An rvalue object is moved into the queue")
                 {
                     queue.push(std::move(aCounter));
-                    THEN("The move constructor will have been called")
+                    THEN("The move constructor will be called once")
                     {
                         CHECK(Counter::moveCtorCount == 1);
-                        CHECK(Counter::ctorCount == 1);    // No change 
-                        CHECK(Counter::copyCtorCount == 1);// No change 
+                        CHECK(Counter::ctorCount == 1);     // No change 
+                        CHECK(Counter::copyCtorCount == 1); // No change 
                     }
                 }
             }
