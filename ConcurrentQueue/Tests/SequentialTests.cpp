@@ -141,35 +141,42 @@ SCENARIO ("Copy construct & copy assign a queue")
 
 struct Counter {
 public:
-    Counter() { ++count; }
-    Counter(const Counter& other) { ++count; }
-    Counter(Counter&& other) = default;
-    static size_t count;
+    Counter() { ++ctorCount; }
+    Counter(const Counter& other) { ++copyCtorCount; }
+    Counter(Counter&& other) { ++moveCtorCount; }
+    static size_t ctorCount;
+    static size_t copyCtorCount;
+    static size_t moveCtorCount;
 };
-size_t Counter::count = 0;
+size_t Counter::ctorCount = 0;
+size_t Counter::copyCtorCount = 0;
+size_t Counter::moveCtorCount = 0;
 
 SCENARIO("Move an object into the queue")
 {
-    GIVEN("An empty queue and 1 Counter objects")
+    GIVEN("An empty queue and a Counter object")
     {
         ConcurrentQueue<Counter> queue;
         Counter aCounter;
-        CHECK(Counter::count == 1);
+        CHECK(Counter::ctorCount == 1);
 
         WHEN("An lvalue object is copied into the queue")
         {
             queue.push(aCounter);
 
-            THEN("The constructor will have been called once")
+            THEN("The copy constructor will have been called once")
             {
-                CHECK(Counter::count == 2);
+                CHECK(Counter::copyCtorCount == 1);
+                CHECK(Counter::ctorCount == 1); // No change 
 
                 WHEN("An rvalue object is moved into the queue")
                 {
                     queue.push(std::move(aCounter));
-                    THEN("The constructor will not have been called")
+                    THEN("The move constructor will have been called")
                     {
-                        CHECK(Counter::count == 2);
+                        CHECK(Counter::moveCtorCount == 1);
+                        CHECK(Counter::ctorCount == 1);    // No change 
+                        CHECK(Counter::copyCtorCount == 1);// No change 
                     }
                 }
             }
