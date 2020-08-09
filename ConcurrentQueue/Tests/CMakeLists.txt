@@ -1,4 +1,4 @@
-add_executable (TestConcurrentQueue main.cpp
+add_executable (TestConcurrentQueue Main.cpp
                                     SequentialTests.cpp
                                     SumNumbersTest.cpp)
 
