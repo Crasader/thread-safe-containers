@@ -25,24 +25,18 @@ int pushData(ConcurrentQueue<int>& queue, std::random_device::result_type seed)
     return total;
 }
 
-int consumeData(ConcurrentQueue<int>& queue, std::atomic<bool>& complete)
+int consumeData(ConcurrentQueue<int>& queue, std::atomic<bool>& producersComplete)
 {
     int total{0};
 
-    while ( true)
+    while (!producersComplete)                      // While producers are still pushing data.
     {
-        if (auto data = queue.tryFrontPop())
+        while (auto data = queue.tryFrontPop())     // While there is still data in the queue.
         {
             total += *data;
         }
-        else // there is no more data
-        {
-            if (complete) // The producers have stopped pushing data
-            {
-                return total;
-            }
-        }
     }
+    return total;
 }
 
 // The producers 
