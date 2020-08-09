@@ -68,15 +68,10 @@ TEST_CASE("Sum numbers")
     std::random_device::result_type seed = rd();
     INFO("Using seed: " << seed);      
 
-    // Consumer 1
     std::future<int> consumer1Total = std::async(consumeData, std::ref(queue), std::ref(producersComplete));
-    // Producer 1 
     std::future<int> producer1Total = std::async(pushData, std::ref(queue), ++seed);
-    // Producer 2
     std::future<int> producer2Total = std::async(pushData, std::ref(queue), ++seed);
-    // Consumer 2
     std::future<int> consumer2Total = std::async(consumeData, std::ref(queue), std::ref(producersComplete));
-    // Producer 3
     std::future<int> producer3Total = std::async(pushData, std::ref(queue), ++seed);
 
     int prodTotal = producer1Total.get() + producer2Total.get() + producer3Total.get();
