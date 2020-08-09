@@ -61,7 +61,8 @@ Calling code doesn't have to construct any out param objects.
 Clean syntax to check if data is valid.
 
 ## Mutex & Conditional Variable type
-`std::shared_mutex` is used to allow multiple readers to access the queue at the same time. 
-`std::condition_variable` only works with std::mutex (for performance reasons).
-`std::condition_variable_any` is used instead because it works with a shared mutex. 
-May want to consider using switching this if the performance is noticable.
+`std::shared_mutex` allows for multiple readers (non-modifying) access to the queue at the same time. However that means the less performant `std::condition_variable_any` has to be used (rather than `std::condition_variable`).  
+Under most circumstances there is no value is querying the state of the queue (is empty, size, etc) since there is no guarantee that the state will not be changed by another thread before you can make an action based off of the state. Therefore it is not worth making performance sacrafices for shared reading of the queue. 
+
+
+
