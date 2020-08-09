@@ -14,7 +14,7 @@ queue.push("World");
 ```
 # Retreival
 Two methods are provided for retreiving data.
-If the queue is empty `tryFrontPop()` will return immediatly
+If the queue is empty `tryFrontPop()` will return (a std::optional) immediately.
 ```C++
 auto val = queue.tryFrontPop();
 if (val){
