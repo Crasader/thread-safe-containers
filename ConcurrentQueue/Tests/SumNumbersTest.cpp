@@ -57,9 +57,9 @@ int consumeData(ConcurrentQueue<int>& queue, std::atomic<bool>& complete)
 // - read data from the queue
 // - maintain a total for all the numbers they have read.
 // The consumers stop reading when there is no more data in the queue and the producers have stopped pushing data.
-// A check is performed to ensure the total of the numbers the producers put in the queue is the same as the total of the numbers 
+// A check is performed to ensure the total of the numbers the producers put in the queue is the same as the total of the numbers
 // the consumers read from the queue.
-// Catch2 macros INFO/SCOPED_INFO are not thread safe so the seed has to be generated & printed in main thread rather than in producers thread
+// Catch2's INFO macro is not thread safe so the seed has to be generated & printed in main thread rather than in producers thread.
 TEST_CASE("Sum numbers")
 {
     ConcurrentQueue<int> queue;
