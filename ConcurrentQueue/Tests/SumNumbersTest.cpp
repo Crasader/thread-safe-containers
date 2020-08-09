@@ -64,24 +64,20 @@ TEST_CASE("Sum numbers")
 {
     ConcurrentQueue<int> queue;
     std::atomic<bool> producersComplete{false};
-    std::random_device rd;        
+    std::random_device rd;  
+    auto seed = rd();
+    INFO("Using seed: " << seed);      
 
     // Consumer 1
     std::future<int> consumer1Total = std::async(consumeData, std::ref(queue), std::ref(producersComplete));
     // Producer 1 
-    auto producer1Seed = rd();
-    INFO("Producer 1 using seed: " << producer1Seed);
-    std::future<int> producer1Total = std::async(pushData, std::ref(queue), producer1Seed);
+    std::future<int> producer1Total = std::async(pushData, std::ref(queue), ++seed);
     // Producer 2
-    auto producer2Seed = rd();
-    INFO("Producer 2 using seed: " << producer2Seed);
-    std::future<int> producer2Total = std::async(pushData, std::ref(queue), producer2Seed);
+    std::future<int> producer2Total = std::async(pushData, std::ref(queue), ++seed);
     // Consumer 2
     std::future<int> consumer2Total = std::async(consumeData, std::ref(queue), std::ref(producersComplete));
     // Producer 3
-    auto producer3Seed = rd();
-    INFO("Producer 3 using seed: " << producer3Seed);
-    std::future<int> producer3Total = std::async(pushData, std::ref(queue), producer3Seed);
+    std::future<int> producer3Total = std::async(pushData, std::ref(queue), ++seed);
 
     int prodTotal = producer1Total.get() + producer2Total.get() + producer3Total.get();
     producersComplete =true;
