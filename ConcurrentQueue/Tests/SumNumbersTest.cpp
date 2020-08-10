@@ -60,10 +60,10 @@ TEST_CASE("Sum numbers")
     INFO("Using seed: " << seed);      
 
     std::future<int> consumer1Total = std::async(consumeData, std::ref(queue), std::ref(producersComplete));
-    std::future<int> producer1Total = std::async(pushData, std::ref(queue), ++seed);
-    std::future<int> producer2Total = std::async(pushData, std::ref(queue), ++seed);
+    std::future<int> producer1Total = std::async(pushData, std::ref(queue), seed++);
+    std::future<int> producer2Total = std::async(pushData, std::ref(queue), seed++);
     std::future<int> consumer2Total = std::async(consumeData, std::ref(queue), std::ref(producersComplete));
-    std::future<int> producer3Total = std::async(pushData, std::ref(queue), ++seed);
+    std::future<int> producer3Total = std::async(pushData, std::ref(queue), seed++);
 
     int prodTotal = producer1Total.get() + producer2Total.get() + producer3Total.get();
     producersComplete = true;
