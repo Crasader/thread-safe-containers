@@ -75,6 +75,7 @@ SCENARIO ("Basic Usage waitingFrontPop()")
                     {
                         std::this_thread::sleep_for (std::chrono::milliseconds(200));
                         queue.push("A new item");
+
                         THEN("The waiting thread will get the new item")
                         {
                             thread1.join();
@@ -111,8 +112,8 @@ SCENARIO ("Copy construct & copy assign a queue")
             }
             WHEN ("The queue is copy assigned")
             {		
-                // Assigment must be done on a seperate line from the declaration otherwise the copy constructor will be used.
                 ConcurrentQueue<std::string> copied_queue; 
+                // Assigment must be done on a seperate line from the declaration otherwise the copy constructor will be used.
                 copied_queue = queue;
 
                 THEN ("The queue will have the same data as the original queue")
@@ -127,6 +128,7 @@ SCENARIO ("Copy construct & copy assign a queue")
             WHEN ("The queue is self assigned")
             {		
                 queue = queue;
+                
                 THEN ("The queue will be unchanged")
                 {		
                     for (int i = 0; i < 20; i++)
@@ -141,35 +143,43 @@ SCENARIO ("Copy construct & copy assign a queue")
 
 struct Counter {
 public:
-    Counter() { ++count; }
-    Counter(const Counter& other) { ++count; }
-    Counter(Counter&& other) = default;
-    static size_t count;
+    Counter()                     { ++ctorCount;     }
+    Counter(const Counter& other) { ++copyCtorCount; }
+    Counter(Counter&& other)      { ++moveCtorCount; }
+    static size_t ctorCount;
+    static size_t copyCtorCount;
+    static size_t moveCtorCount;
 };
-size_t Counter::count = 0;
+size_t Counter::ctorCount     = 0;
+size_t Counter::copyCtorCount = 0;
+size_t Counter::moveCtorCount = 0;
 
 SCENARIO("Move an object into the queue")
 {
-    GIVEN("An empty queue and 1 Counter objects")
+    GIVEN("An empty queue and a Counter object")
     {
         ConcurrentQueue<Counter> queue;
         Counter aCounter;
-        CHECK(Counter::count == 1);
+        CHECK(Counter::ctorCount == 1);
 
         WHEN("An lvalue object is copied into the queue")
         {
             queue.push(aCounter);
 
-            THEN("The constructor will have been called once")
+            THEN("The copy constructor will be called once")
             {
-                CHECK(Counter::count == 2);
+                CHECK(Counter::copyCtorCount == 1);
+                CHECK(Counter::ctorCount == 1); // No change 
 
                 WHEN("An rvalue object is moved into the queue")
                 {
                     queue.push(std::move(aCounter));
-                    THEN("The constructor will not have been called")
+
+                    THEN("The move constructor will be called once")
                     {
-                        CHECK(Counter::count == 2);
+                        CHECK(Counter::moveCtorCount == 1);
+                        CHECK(Counter::ctorCount == 1);     // No change 
+                        CHECK(Counter::copyCtorCount == 1); // No change 
                     }
                 }
             }

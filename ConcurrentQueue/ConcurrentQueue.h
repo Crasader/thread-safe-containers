@@ -2,9 +2,9 @@
 #define CONCURRENTQUEUE_H
 
 #include <queue>
-#include <shared_mutex>
-#include <condition_variable>
 #include <optional>
+#include <mutex>
+#include <condition_variable>
 
 template<typename T, class Container = std::deque<T>>
 class ConcurrentQueue
@@ -22,9 +22,9 @@ public:
     bool empty() const; 
 
 private:
-    mutable std::shared_mutex mMutex;
+    mutable std::mutex mMutex;
     std::queue<T, Container> mQueue;
-    std::condition_variable_any mConVar;
+    std::condition_variable mConVar;
 };
 
 
@@ -32,7 +32,7 @@ private:
 template<typename T, class Container>
 ConcurrentQueue<T, Container>::ConcurrentQueue(const ConcurrentQueue& other)
 {
-    std::shared_lock sharedLock(other.mMutex);
+    std::scoped_lock scopedLock(other.mMutex);
     mQueue = other.mQueue;
 }
 
@@ -115,7 +115,7 @@ std::optional<T> ConcurrentQueue<T, Container>::tryFrontPop()
 template<typename T, class Container>
 bool ConcurrentQueue<T, Container>::empty() const
 {
-    std::shared_lock sharedLock(mMutex);
+    std::scoped_lock scopedLock(mMutex);
     return mQueue.empty();
 }
 
