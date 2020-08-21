@@ -1,9 +1,10 @@
 project (CircularBuffer)
 
-add_library (${PROJECT_NAME} INTERFACE)
+add_library (CircularBuffer INTERFACE)
 
-target_include_directories (${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories (CircularBuffer INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-if (${COMMON_TESTS})
-    add_subdirectory (Tests)
-endif(${COMMON_TESTS})
+find_package(Threads REQUIRED)
+target_link_libraries(CircularBuffer INTERFACE Threads::Threads)
+
+add_subdirectory (Tests)

@@ -1,1 +1,17 @@
-add_catch_test(CircularBufferTest CircularBuffer DataStructures CircularBufferTest.cpp)
+add_executable (CircularBufferTest CircularBufferTest.cpp)
+
+target_link_libraries (CircularBufferTest PRIVATE Catch2)           # link to the testing library
+target_link_libraries (CircularBufferTest PRIVATE CircularBuffer)  # link to the business logic to be tested
+
+# Add test to CTest. Define the command used to run the test (catch flags)
+# Catch2 flag info: https://github.com/catchorg/Catch2/blob/master/docs/command-line.md
+add_test(NAME CircularBufferTest 
+         COMMAND CircularBufferTest --reporter junit
+                                     --name Containers
+                                     --filenames-as-tags 
+                                     --success 
+                                     --out ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/CircularBufferTestResults.xml)
+
+# Add CTest label. Tests with the same label are grouped together. 
+set_tests_properties (CircularBufferTest PROPERTIES LABELS Containers) 
+    
