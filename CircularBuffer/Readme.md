@@ -53,8 +53,9 @@ For more example usage see the Tests folder.
 |Insert	  |	push     | O(1)       |						   											   |
 			
 ## Limitations
-1. It is assumed the circular buffer will always be sorted by time. This is assumed because newer data will have a later time stamp (bigger number) and will be inserted after older data.  
-2. The size of the buffer must be known at compile time 
+* It is assumed the circular buffer will always be sorted by time. This is assumed because newer data will have a later time stamp (bigger number) and will be inserted after older data.  
+* The size of the buffer must be known at compile time 
+* Time_point must be used as the key. I could not think of any other key that may be used. If there is one then the key could be changed to a templated type
  
 ## Notes
 
