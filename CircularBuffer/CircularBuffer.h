@@ -3,6 +3,7 @@
 
 #include <array>
 #include <shared_mutex>
+#include <mutex>
 #include <utility>
 
 enum class FoundStatus {
@@ -51,7 +52,7 @@ class CircularBuffer
     * @brief Advance iterator. If it points to the last element then wrap it back to the first element
     * @param iter The iterator to be advanced
     */
-    void increment_iter(typename std::array<std::pair<double, T>, SIZE>::const_iterator& iter) const;
+    void increment_iter(typename std::array<std::pair<double, T>, SIZE>::iterator& iter) ;
 
    /**
     * @brief Split the array into two arrays using mNewest as the splitting point
@@ -123,7 +124,7 @@ FoundStatus CircularBuffer<T, SIZE>::get_at(const double time, T& item) const
 }
 
 template<typename T, std::size_t SIZE>
-void CircularBuffer<T, SIZE>::increment_iter(typename std::array<std::pair<double, T>, SIZE>::const_iterator& iter) const
+void CircularBuffer<T, SIZE>::increment_iter(typename std::array<std::pair<double, T>, SIZE>::iterator& iter) 
 {
     if (iter == std::prev(mBuffer.end())) // If iterator is currently pointing to last element
     {
