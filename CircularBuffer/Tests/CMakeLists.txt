@@ -1,0 +1,1 @@
+add_catch_test(CircularBufferTest CircularBuffer DataStructures CircularBufferTest.cpp)
